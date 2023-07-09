@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>云朵追击游戏</title>
+  <style>
+    #game-container {
+      position: relative;
+      width: 900px;
+      height: 450px;
+      border: 1px solid #000;
+      color: rgb(7, 98, 244);
+      overflow: hidden;
+      margin: 0 auto;
+      text-align: center;
+      background-color: rgb(201, 240, 250);
+    }
+    #player {
+      position: absolute;
+      width: 65px;
+      height: 40px;
+      background-color: blue;
+    }
+    #player {
+       background-image: url('飞机.jpg'); /* 替换为你的player图片的URL */
+       background-repeat: no-repeat;
+       background-size: cover;
+      }
+    .cloud {
+      position: absolute;
+      width: 65px;
+      height: 40px;
+      background-color: rgb(5, 196, 221);
+    }
+    .cloud {
+  background-image: url('云朵.jpg'); /* 替换为你的player图片的URL */
+  background-repeat: no-repeat;
+  background-size: cover;
+    }
+    #score {
+      font-size: 24px;
+      margin-top: 5px;
+      text-align: center;
+      color: #f9e27f;
+    }
+    #timer {
+      font-size: 24px;
+      text-align: center;
+      margin-top: 5px;
+      color: #ffeb94;
+    }
+     h1 {
+      text-align: center;
+      font-family:'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+      color: rgb(25, 195, 195);
+      background-color: beige;
+    }
+     p{
+      text-align: center;
+      color: rgb(136, 217, 240);
+      font-size: larger;
+      font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+    }
+    h2{
+      text-align: center;
+      font-family: Arial, Helvetica, sans-serif;
+    }
+    button{
+      text-align: center;
+      margin: 0 auto;
+    }
+    #startButtonContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 5vh; /* 或者你需要的高度 */
+}
+body {
+  background-image: url('蓝色背景.jpg'); /* 替换为你的背景图片的URL */
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+  </style>
+</head>
+<body>
+  <h1>云朵追击游戏</h1>
+  <p>使用方向键或鼠标控制飞行器移动</p>
+  <div id="startButtonContainer">
+    <button id="startButton">开始游戏</button>
+  </div>
+<div id="game-container">
+  <div id="player"></div>
+</div>
+<div id="score">得分: 0</div>
+<div id="timer">倒计时: 30</div>
+<audio id="bgm" loop>
+  <source src="汇总/all of the girls you loved before.mp3" type="audio/mpeg"> <!-- 替换为你的BGM文件的URL -->
+</audio>
+  <script>
+    // 获取游戏容器和玩家元素
+    const gameContainer = document.getElementById('game-container');
+    const player = document.getElementById('player');
+    const score = document.getElementById('score');
+    const timer = document.getElementById('timer');
+    // 初始化玩家位置、分数和倒计时
+    let playerX = 275;
+    let playerY = 175;
+    let playerScore = 0;
+    let countdown = 30;
+    // 更新玩家位置、分数和倒计时
+    function updatePlayer() {
+      player.style.left = playerX + 'px';
+      player.style.top = playerY + 'px';
+      score.textContent = '得分: ' + playerScore;
+      timer.textContent = '倒计时: ' + countdown;
+    }
+    // 监听键盘按键事件
+    document.addEventListener('keydown', function(event) {
+      const key = event.keyCode;
+      if (key === 37 && playerX > 0) { // 左箭头键
+        playerX -= 10;
+      } else if (key === 38 && playerY > 0) { // 上箭头键
+        playerY -= 10;
+      } else if (key === 39 && playerX + 50 < 900) { // 右箭头键
+        playerX += 10;
+      } else if (key === 40 && playerY + 50 < 460) { // 下箭头键
+        playerY += 10;
+      }
+      updatePlayer();
+    });
+    // 监听鼠标移动事件
+    gameContainer.addEventListener('mousemove', function(event) {
+      playerX = event.clientX - gameContainer.offsetLeft - 25;
+      playerY = event.clientY - gameContainer.offsetTop - 25;
+      updatePlayer();
+    });
+    // 创建云朵元素并随机设置位置
+    function createCloud() {
+      const cloud = document.createElement('div');
+      cloud.className = 'cloud';
+      cloud.style.left = Math.random() * 700 + 'px';
+      cloud.style.top = Math.random() * 450 + 'px';
+      gameContainer.appendChild(cloud);
+      return cloud;
+    }
+    // 移动云朵元素
+    function moveCloud(cloud) {
+      const x = parseFloat(cloud.style.left);
+      const y = parseFloat(cloud.style.top);
+      const newX = x + Math.random() * 10 - 5;
+      const newY = y + Math.random() * 10 - 5;
+      cloud.style.left = newX + 'px';
+      cloud.style.top = newY + 'px';
+      checkCollision(cloud);
+    }
+    // 检查碰撞
+    function checkCollision(cloud) {
+      const cloudRect = cloud.getBoundingClientRect();
+      const playerRect = player.getBoundingClientRect();
+      if (
+        cloudRect.left < playerRect.right &&
+        cloudRect.right > playerRect.left &&
+        cloudRect.top < playerRect.bottom &&
+        cloudRect.bottom > playerRect.top
+      ) {
+        playerScore++;
+        cloud.remove();
+      }
+    }
+   // 创建并移动云朵
+cloudInterval = setInterval(function() {
+  if (!gameOver) { // 只有当游戏没有结束时才创建新的云朵
+    const cloud = createCloud();
+    setInterval(function() {
+      moveCloud(cloud);
+    }, 100);
+  }
+}, 1000);    
+// 倒计时函数
+function countdownTimer() {
+  var intervalId = setInterval(function() {
+    countdown--;
+    timer.textContent = '倒计时: ' + countdown;
+    if (countdown <= 0) {
+      clearInterval(intervalId); // 停止计时器
+      endGame();
+    }
+  }, 1000);                
+}
+// 游戏结束函数
+function endGame() {
+  gameOver = true; // 游戏结束时设置gameOver为true
+  clearInterval(cloudInterval);
+  clearInterval(timerInterval);
+  gameContainer.innerHTML = '<h2>游戏结束</h2><p>最后得分: ' + playerScore + '</p><button onclick="restartGame()">重新开始</button>';
+} 
+// 重新开始游戏函数
+    function restartGame() {
+      location.reload();
+    }
+    // 开始游戏
+function startGame() {
+  timerInterval = countdownTimer();
+  cloudInterval = setInterval(function() {
+    const cloud = createCloud();
+    setInterval(function() {
+      moveCloud(cloud);
+    }, 100);
+  }, 1000);
+}
+    // 页面加载后添加开始按钮的点击事件监听器
+window.onload = function() {
+  document.getElementById('startButton').addEventListener('click', startGame);
+};
+let bgm = document.getElementById('bgm');
+// 在游戏开始时播放BGM
+bgm.play();
+  </script>
+</body>
+</html>
